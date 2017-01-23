@@ -1,7 +1,7 @@
 // ****************************
 //
 //  Jesse Squires
-//  
+//
 //  15 puzzle
 //
 // ****************************
@@ -97,11 +97,11 @@ class Board {
         this.pieces[toX][toY] = fromPiece;
         this.pieces[fromX][fromY] = toPiece;
     }
-    
+
     // Generates a 2D array of `Piece` objects.
     generateGrid(gridSize) {
         let total = Math.pow(gridSize, 2);
-        let pieces = this.generatePieces(total);    
+        let pieces = this.generatePieces(total);
         let grid = this.generate2DArray(gridSize);
 
         for (let x = 0; x < gridSize; x++) {
@@ -124,7 +124,7 @@ class Board {
     generatePieces(total) {
         let pieces = [];
         for (let i = 0; i < total; i++) {
-            
+
             let isEmpty = (i == 0);
             let color = isEmpty ? "#fff" : "#3c929e";
             pieces[i] = new Piece(i, color);
@@ -168,9 +168,12 @@ class Puzzle {
         let fontSize = Math.ceil(pieceSize / 2.5);
 
         let context = this.canvas.getContext("2d");
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
         context.font = fontSize + "px arial";
         context.textAlign = "left";
         context.textBaseline = "middle";
+
 
         for (let i = 0; i < boardSize; i++) {
             for (let j = 0; j < boardSize; j ++) {
@@ -183,9 +186,9 @@ class Puzzle {
 
                 let borderWidth = 1;
                 context.strokeStyle = "#fff";
-                context.strokeRect(originX + borderWidth, 
-                                   originY + borderWidth, 
-                                   pieceSize - (borderWidth * 2), 
+                context.strokeRect(originX + borderWidth,
+                                   originY + borderWidth,
+                                   pieceSize - (borderWidth * 2),
                                    pieceSize - (borderWidth * 2));
 
                 context.fillStyle = piece.foregroundColor();
@@ -194,8 +197,8 @@ class Puzzle {
                 let offset =  Math.floor(pieceSize / 2);
                 let textX = Math.floor(textMetrics.width / 2);
                 let textY = 44;
-                context.fillText(piece.displayText(), 
-                                 originX + offset - textX, 
+                context.fillText(piece.displayText(),
+                                 originX + offset - textX,
                                  originY + offset);
             }
         }
@@ -206,7 +209,7 @@ class Puzzle {
         let boardSize = board.size;
         let pieceSize = this.pieceSize();
 
-        let x = Math.floor(xClick / pieceSize);        
+        let x = Math.floor(xClick / pieceSize);
         let y = Math.floor(yClick / pieceSize);
         if (board.isOutOfBounds(x) || board.isOutOfBounds(y)) {
             return;
