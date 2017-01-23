@@ -31,15 +31,23 @@
                 background-color: #ddd;
                 border: 1px solid #777;
             }
+            .btn {
+                float: none;
+                margin-left: auto;
+                margin-right: auto;
+                display: block;
+            }
         </style>
     </head>
     <body>
         <div class="container">
             <h1 class="text-center">15 puzzle</h1>
-            <h1 class="text-center"><small>Click the pieces to move and solve the puzzle</small></h1>
+            <h2 class="text-center"><small>Click the pieces to move them and solve the puzzle.</small></h2>
             <canvas class="canvas" id="canvas" width="400" height="400">
                 Canvas not supported by your browser.
             </canvas>
+            <p id="warning" class="text-danger text-center"></p>
+            <button class="btn btn-default" onclick="resetGame()">Reset</button>
         </div>
 
         <!-- jQuery -->

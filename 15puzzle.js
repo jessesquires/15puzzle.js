@@ -23,11 +23,11 @@ class Piece {
     }
 
     foregroundColor() {
-        return '#fff';
+        return "#fff";
     }
 
     displayText() {
-        return this.isEmpty() ? '' : this.number;
+        return this.isEmpty() ? "" : this.number;
     }
 }
 
@@ -47,8 +47,6 @@ class Board {
         if (this.pieces[x][y].isEmpty()) {
             return false;
         }
-
-        console.log("Tapped: " + this.pieces[x][y].displayText() + " at (" + x + ", " + y + ")");
 
         // check north
         let north = y + 1;
@@ -128,7 +126,7 @@ class Board {
         for (let i = 0; i < total; i++) {
             
             let isEmpty = (i == 0);
-            let color = isEmpty ? '#fff' : '#3c929e';
+            let color = isEmpty ? "#fff" : "#3c929e";
             pieces[i] = new Piece(i, color);
         }
         this.shuffleArray(pieces);
@@ -169,10 +167,10 @@ class Puzzle {
         let pieceSize = this.pieceSize();
         let fontSize = Math.ceil(pieceSize / 2.5);
 
-        let context = this.canvas.getContext('2d');
-        context.font = fontSize + 'px arial';
-        context.textAlign = 'left';
-        context.textBaseline = 'middle';
+        let context = this.canvas.getContext("2d");
+        context.font = fontSize + "px arial";
+        context.textAlign = "left";
+        context.textBaseline = "middle";
 
         for (let i = 0; i < boardSize; i++) {
             for (let j = 0; j < boardSize; j ++) {
@@ -184,7 +182,7 @@ class Puzzle {
                 context.fillRect(originX, originY, pieceSize, pieceSize);
 
                 let borderWidth = 1;
-                context.strokeStyle = '#fff'
+                context.strokeStyle = "#fff";
                 context.strokeRect(originX + borderWidth, 
                                    originY + borderWidth, 
                                    pieceSize - (borderWidth * 2), 
@@ -209,37 +207,43 @@ class Puzzle {
         let pieceSize = this.pieceSize();
 
         let x = Math.floor(xClick / pieceSize);        
-        if (board.isOutOfBounds(x)) {
-            return;
-        }
-
         let y = Math.floor(yClick / pieceSize);
-        if (board.isOutOfBounds(y)) {
+        if (board.isOutOfBounds(x) || board.isOutOfBounds(y)) {
             return;
         }
 
         if (board.movePieceAt(x,y)) {
+            displayWarning("");
             this.draw();
+        } else {
+            displayWarning("You can't move piece <b>" + board.pieces[x][y].displayText() + "</b>!");
         }
     }
 }
 
+function displayWarning(text) {
+    $("#warning").html(text);
+}
 
-window.onload = function(){
-    let canvas = document.getElementById("canvas");
-    if (canvas.width != canvas.height) {
-        throw "Error: canvas must have equal width and height."
+function resetGame() {
+    let canvas = $("#canvas");
+    let canvasNode = canvas.get(0);
+    if (canvasNode.width != canvasNode.height) {
+        throw "Error: canvas must have equal width and height.";
     }
 
+    displayWarning("");
+
     let gridSize = 4; // 4x4 grid
-    let puzzle = new Puzzle(canvas, gridSize);
+    let puzzle = new Puzzle(canvasNode, gridSize);
 
-    console.log(puzzle.board)
-
-    canvas.addEventListener('click', function(event) {
+    canvas.off("click");
+    canvas.on("click", function(event) {
         let rect = this.getBoundingClientRect();
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
         puzzle.handleClickAt(x, y);
     });
 }
+
+window.onload = resetGame();
