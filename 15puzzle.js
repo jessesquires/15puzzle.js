@@ -15,7 +15,7 @@ class Piece {
     }
 
     isEmpty() {
-        return this.number == 0;
+        return this.number === 0;
     }
 
     backgroundColor() {
@@ -37,6 +37,67 @@ class Board {
     constructor(gridSize) {
         this.size = gridSize;
         this.pieces = this.generateGrid(gridSize);
+    }
+
+    isOutOfBounds(val) {
+        return val < 0 || val >= this.size;
+    }
+
+    movePieceAt(x, y) {
+        if (this.pieces[x][y].isEmpty()) {
+            return false;
+        }
+
+        console.log("Tapped: " + this.pieces[x][y].displayText() + " at (" + x + ", " + y + ")");
+
+        // check north
+        let north = y + 1;
+        if (!this.isOutOfBounds(north)) {
+            let northPiece = this.pieces[x][north];
+            if (northPiece.isEmpty()) {
+                this.movePieceFromTo(x, y, x, north);
+                return true
+            }
+        }
+
+        // check east
+        let east = x + 1;
+        if (!this.isOutOfBounds(east)) {
+            let eastPiece = this.pieces[east][y];
+            if (eastPiece.isEmpty()) {
+                this.movePieceFromTo(x, y, east, y);
+                return true
+            }
+        }
+
+        // check south
+        let south = y - 1;
+        if (!this.isOutOfBounds(south)) {
+            let southPiece = this.pieces[x][south];
+            if (southPiece.isEmpty()) {
+                this.movePieceFromTo(x, y, x, south);
+                return true
+            }
+        }
+
+        // check west
+        let west = x - 1;
+        if (!this.isOutOfBounds(west)) {
+            let westPiece = this.pieces[west][y];
+            if (westPiece.isEmpty()) {
+                this.movePieceFromTo(x, y, west, y);
+                return true
+            }
+        }
+
+        return false;
+    }
+
+    movePieceFromTo(fromX, fromY, toX, toY) {
+        let fromPiece = this.pieces[fromX][fromY];
+        let toPiece = this.pieces[toX][toY];
+        this.pieces[toX][toY] = fromPiece;
+        this.pieces[fromX][fromY] = toPiece;
     }
     
     // Generates a 2D array of `Piece` objects.
@@ -143,37 +204,23 @@ class Puzzle {
     }
 
     handleClickAt(xClick, yClick) {
-        let boardSize = this.board.size;
+        let board = this.board;
+        let boardSize = board.size;
         let pieceSize = this.pieceSize();
 
         let x = Math.floor(xClick / pieceSize);        
-        if (x < 0 || x > boardSize) {
+        if (board.isOutOfBounds(x)) {
             return;
         }
 
         let y = Math.floor(yClick / pieceSize);
-        if (y < 0 || y > boardSize) {
+        if (board.isOutOfBounds(y)) {
             return;
         }
 
-        let piece = this.board.pieces[x][y];
-        if (!this.canMovePiece(piece)) {
-            return;
+        if (board.movePieceAt(x,y)) {
+            this.draw();
         }
-        console.log("Tapped: " + x + ", " + y);
-        console.log("Piece = " + piece);
-    }
-
-    canMovePiece(piece) {
-        if (!piece.isEmpty) {
-            return false;
-        }
-        
-        return true;
-    }
-
-    pieceIsAdjacentToEmptySpace(x, y) {
-
     }
 }
 
@@ -183,6 +230,7 @@ window.onload = function(){
     if (canvas.width != canvas.height) {
         throw "Error: canvas must have equal width and height."
     }
+
     let gridSize = 4; // 4x4 grid
     let puzzle = new Puzzle(canvas, gridSize);
 
