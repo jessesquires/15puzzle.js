@@ -184,7 +184,7 @@ class Puzzle {
                 context.fillStyle = piece.backgroundColor();
                 context.fillRect(originX, originY, pieceSize, pieceSize);
 
-                let borderWidth = 1;
+                let borderWidth = 0.5;
                 context.strokeStyle = "#fff";
                 context.strokeRect(originX + borderWidth,
                                    originY + borderWidth,
