@@ -225,7 +225,7 @@ function displayWarning(text) {
     $("#warning").html(text);
 }
 
-function resetGame() {
+function init() {
     let canvas = $("#canvas");
     let canvasNode = canvas.get(0);
     if (canvasNode.width != canvasNode.height) {
@@ -246,4 +246,4 @@ function resetGame() {
     });
 }
 
-window.onload = resetGame();
+window.onload = init();
