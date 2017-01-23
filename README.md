@@ -1,2 +1,3 @@
 # 15puzzle.js
-15 puzzle in javascript
+
+A [15 puzzle](https://en.wikipedia.org/wiki/15_puzzle) written in javascript.
