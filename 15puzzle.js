@@ -7,11 +7,15 @@
 // ****************************
 
 
+// Represents a piece on the board.
 class Piece {
-    constructor(number, color, isMoveable) {
+    constructor(number, color) {
         this.number = number;
         this.color = color;
-        this.isMoveable = isMoveable;
+    }
+
+    isEmpty() {
+        return this.number == 0;
     }
 
     backgroundColor() {
@@ -23,17 +27,19 @@ class Piece {
     }
 
     displayText() {
-        return (this.number == 0) ? '' : this.number;
+        return this.isEmpty() ? '' : this.number;
     }
 }
 
 
-class Puzzle {
+// Represents the board of pieces.
+class Board {
     constructor(gridSize) {
-        this.gridSize = gridSize;
-        this.grid = this.generateGrid(gridSize);
+        this.size = gridSize;
+        this.pieces = this.generateGrid(gridSize);
     }
-
+    
+    // Generates a 2D array of `Piece` objects.
     generateGrid(gridSize) {
         let total = Math.pow(gridSize, 2);
         let pieces = this.generatePieces(total);    
@@ -60,14 +66,9 @@ class Puzzle {
         let pieces = [];
         for (let i = 0; i < total; i++) {
             
-            if (i == 0) {
-                var color = '#fff';
-                var isMoveable = false;
-            } else {
-                var color = '#3c929e';
-                var isMoveable = true;
-            } 
-            pieces[i] = new Piece(i, color, isMoveable);
+            let isEmpty = (i == 0);
+            let color = isEmpty ? '#fff' : '#3c929e';
+            pieces[i] = new Piece(i, color);
         }
         this.shuffleArray(pieces);
         return pieces;
@@ -90,58 +91,107 @@ class Puzzle {
 }
 
 
-function drawPuzzleInCanvas(puzzle, canvas) {
-    let boardSize = canvas.width;
-    let gridSize = puzzle.gridSize;
-    let squareSize = boardSize / gridSize;
-    let fontSize = Math.ceil(squareSize / 2.5);
+// Represents the puzzle. Owns a canvas and a board.
+class Puzzle {
+    constructor(canvas, gridSize) {
+        this.canvas = canvas;
+        this.board = new Board(gridSize);
+        this.draw();
+    }
 
-    let context = canvas.getContext('2d');
-    context.font = fontSize + 'px arial';
-    context.textAlign = 'left';
-    context.textBaseline = 'middle';
+    pieceSize() {
+        return Math.floor(this.canvas.width / this.board.size);
+    }
 
-    for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j ++) {
-            let piece = puzzle.grid[i][j];
+    draw() {
+        let boardSize = this.board.size;
+        let pieceSize = this.pieceSize();
+        let fontSize = Math.ceil(pieceSize / 2.5);
 
-            let originX = Math.floor(i * squareSize);
-            let originY = Math.floor(j * squareSize);
-            context.fillStyle = piece.backgroundColor();
-            context.fillRect(originX, originY, squareSize, squareSize);
+        let context = this.canvas.getContext('2d');
+        context.font = fontSize + 'px arial';
+        context.textAlign = 'left';
+        context.textBaseline = 'middle';
 
-            let borderWidth = 1;
-            context.strokeStyle = '#fff'
-            context.strokeRect(originX + borderWidth, 
-                               originY + borderWidth, 
-                               squareSize - (borderWidth * 2), 
-                               squareSize - (borderWidth * 2));
+        for (let i = 0; i < boardSize; i++) {
+            for (let j = 0; j < boardSize; j ++) {
+                let piece = this.board.pieces[i][j];
 
-            context.fillStyle = piece.foregroundColor();
+                let originX = Math.floor(i * pieceSize);
+                let originY = Math.floor(j * pieceSize);
+                context.fillStyle = piece.backgroundColor();
+                context.fillRect(originX, originY, pieceSize, pieceSize);
 
-            let numberText = piece.displayText();
-            let textMetrics = context.measureText(numberText);
-            
-            let offset =  Math.floor(squareSize / 2);
-            let textX = Math.floor(textMetrics.width / 2);
-            let textY = 44;
-            context.fillText(piece.displayText(), 
-                             originX + offset - textX, 
-                             originY + offset);
+                let borderWidth = 1;
+                context.strokeStyle = '#fff'
+                context.strokeRect(originX + borderWidth, 
+                                   originY + borderWidth, 
+                                   pieceSize - (borderWidth * 2), 
+                                   pieceSize - (borderWidth * 2));
 
+                context.fillStyle = piece.foregroundColor();
+                let numberText = piece.displayText();
+                let textMetrics = context.measureText(numberText);
+                let offset =  Math.floor(pieceSize / 2);
+                let textX = Math.floor(textMetrics.width / 2);
+                let textY = 44;
+                context.fillText(piece.displayText(), 
+                                 originX + offset - textX, 
+                                 originY + offset);
+            }
         }
+    }
+
+    handleClickAt(xClick, yClick) {
+        let boardSize = this.board.size;
+        let pieceSize = this.pieceSize();
+
+        let x = Math.floor(xClick / pieceSize);        
+        if (x < 0 || x > boardSize) {
+            return;
+        }
+
+        let y = Math.floor(yClick / pieceSize);
+        if (y < 0 || y > boardSize) {
+            return;
+        }
+
+        let piece = this.board.pieces[x][y];
+        if (!this.canMovePiece(piece)) {
+            return;
+        }
+        console.log("Tapped: " + x + ", " + y);
+        console.log("Piece = " + piece);
+    }
+
+    canMovePiece(piece) {
+        if (!piece.isEmpty) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    pieceIsAdjacentToEmptySpace(x, y) {
+
     }
 }
 
 
-
 window.onload = function(){
-    // 4x4 grid
-    let gridSize = 4;
-    let puzzle = new Puzzle(gridSize);
     let canvas = document.getElementById("canvas");
+    if (canvas.width != canvas.height) {
+        throw "Error: canvas must have equal width and height."
+    }
+    let gridSize = 4; // 4x4 grid
+    let puzzle = new Puzzle(canvas, gridSize);
 
-    drawPuzzleInCanvas(puzzle, canvas);
+    console.log(puzzle.board)
 
-    console.log(puzzle);
+    canvas.addEventListener('click', function(event) {
+        let rect = this.getBoundingClientRect();
+        let x = event.clientX - rect.left;
+        let y = event.clientY - rect.top;
+        puzzle.handleClickAt(x, y);
+    });
 }
